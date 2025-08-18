@@ -1,14 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <script type="module" crossorigin src="./index.js"></script>
-    <link rel="stylesheet" crossorigin href="./index.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Delivery Service</title>
+    <meta name="description" content="Secure file access and download service with encrypted links and reliable delivery.">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Crypto-JS for AES decryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div id="root">
+        <div class="font-sans bg-gray-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+            <!-- Animated Background -->
+            <div class="absolute inset-0 opacity-30">
+                <div class="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
+                <div class="absolute top-0 -right-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-float-delayed"></div>
+                <div class="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float-slow"></div>
+            </div>
+            
+            <!-- Grid pattern overlay -->
+            <div class="absolute inset-0 bg-gray-900/20 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            
+            <div class="w-full max-w-md relative z-10">
+                
+                <!-- Header -->
+                <div class="text-center mb-8 animate-fade-in">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl backdrop-blur-sm border border-white/10" id="icon-header">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white mb-2" id="text-title">Secure File Access</h1>
+                    <p class="text-gray-300" id="text-subtitle">Encrypted delivery system</p>
+                </div>
+
+                <!-- Status Card -->
+                <div class="bg-gray-800/50 backdrop-blur-md rounded-2xl shadow-2xl p-6 mb-6 border border-white/10">
+                    
+                    <!-- Loading State -->
+                    <div class="text-center" id="state-loading">
+                        <div class="w-12 h-12 border-4 border-purple-300/20 border-t-purple-400 rounded-full animate-spin mx-auto mb-4" id="spinner-loading"></div>
+                        <h2 class="text-lg font-semibold text-white mb-2" id="text-loading-title">Accessing Your File</h2>
+                        <p class="text-gray-300 loading-dots mb-6" id="text-status">Initializing secure protocols</p>
+                        
+                        <!-- Progress Indicators -->
+                        <div class="space-y-3" id="progress-indicators">
+                            <div class="flex items-center text-sm" id="step-1">
+                                <div class="mr-3">
+                                    <div class="w-5 h-5 rounded-full bg-gray-700/50 border border-gray-600 text-gray-400 flex items-center justify-center text-xs backdrop-blur-sm" id="step-1-icon">1</div>
+                                </div>
+                                <span class="text-gray-500" id="step-1-text">Initializing secure channel</span>
+                            </div>
+                            <div class="flex items-center text-sm" id="step-2">
+                                <div class="mr-3">
+                                    <div class="w-5 h-5 rounded-full bg-gray-700/50 border border-gray-600 text-gray-400 flex items-center justify-center text-xs backdrop-blur-sm" id="step-2-icon">2</div>
+                                </div>
+                                <span class="text-gray-500" id="step-2-text">Authenticating access rights</span>
+                            </div>
+                            <div class="flex items-center text-sm" id="step-3">
+                                <div class="mr-3">
+                                    <div class="w-5 h-5 rounded-full bg-gray-700/50 border border-gray-600 text-gray-400 flex items-center justify-center text-xs backdrop-blur-sm" id="step-3-icon">3</div>
+                                </div>
+                                <span class="text-gray-500" id="step-3-text">Preparing file transfer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success State (hidden by default) -->
+                    <div class="text-center hidden" id="state-success">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-full mx-auto mb-4 flex items-center justify-center backdrop-blur-sm" id="icon-success">
+                            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-white mb-2" id="text-success-title">Access Granted!</h2>
+                        <p class="text-gray-300 mb-4" id="text-success-message">Initiating secure file transfer...</p>
+                        <div class="text-sm text-green-400 font-medium" id="text-success-status">Authorization successful</div>
+                    </div>
+
+                    <!-- Error State (hidden by default) -->
+                    <div class="text-center hidden" id="state-error">
+                        <div class="w-12 h-12 bg-red-500/20 rounded-full mx-auto mb-4 flex items-center justify-center backdrop-blur-sm" id="icon-error">
+                            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-lg font-semibold text-white mb-2" id="text-error-title">Access Denied</h2>
+                        <p class="text-gray-300 mb-4" id="text-error-message">Security protocols failed. Please try again.</p>
+                        <button 
+                            onclick="retryConnection()"
+                            class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 backdrop-blur-sm border border-white/10"
+                            id="button-retry"
+                        >
+                            Retry Connection
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center text-sm text-gray-400" id="footer">
+                    <p>Advanced Encryption • Quantum Secure • Zero Logs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./scripts.js"></script>
+</body>
 </html>
